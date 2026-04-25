@@ -168,13 +168,13 @@
                 <div class="jump-title">📍 下一步：去平台粘贴评价</div>
                 <div class="jump-btns">
                     <button class="jump-btn meituan" onclick="jumpTo('meituan')">
-                        <span class="j-icon">🦘</span>打开美团
+                        <span class="j-icon">🦘</span>打开美团App
                     </button>
                     <button class="jump-btn ctrip" onclick="jumpTo('ctrip')">
-                        <span class="j-icon">🐬</span>打开携程
+                        <span class="j-icon">🐬</span>打开携程App
                     </button>
                     <button class="jump-btn fliggy" onclick="jumpTo('fliggy')">
-                        <span class="j-icon">🐷</span>打开飞猪
+                        <span class="j-icon">🐷</span>打开飞猪App
                     </button>
                 </div>
                 <div class="jump-hint" id="jumpHint"></div>
@@ -518,21 +518,24 @@
         const platformConfig = {
             meituan: {
                 name: '美团',
-                schemes: ['imeituan://www.meituan.com', 'meituan://'],
-                webUrl: 'https://i.meituan.com/hotel/',
-                hint: '1. 文案已复制 ✅\n2. 点击上方"打开美团"\n3. 我的 → 待评价 → 粘贴文案 → 提交',
+                schemes: ['imeituan://www.meituan.com', 'imeituan://', 'meituan://'],
+                androidIntent: 'intent://www.meituan.com/#Intent;scheme=imeituan;package=com.sankuai.meituan;end',
+                webUrl: 'https://i.meituan.com/',
+                hint: '1. 文案已复制 ✅\n2. 点“打开美团App”\n3. 美团 → 我的 → 待评价/订单 → 粘贴文案 → 提交',
             },
             ctrip: {
                 name: '携程',
-                schemes: ['ctrip://', 'ctripg://'],
-                webUrl: 'https://m.ctrip.com/webapp/myctrip/orderList.html',
-                hint: '1. 文案已复制 ✅\n2. 点击上方"打开携程"\n3. 我的 → 全部订单 → 找到订单 → 评价 → 粘贴',
+                schemes: ['ctrip://wireless', 'ctrip://', 'ctripg://'],
+                androidIntent: 'intent://wireless/#Intent;scheme=ctrip;package=ctrip.android.view;end',
+                webUrl: 'https://m.ctrip.com/webapp/myctrip/',
+                hint: '1. 文案已复制 ✅\n2. 点“打开携程App”\n3. 携程 → 我的 → 全部订单 → 找到订单 → 评价 → 粘贴',
             },
             fliggy: {
                 name: '飞猪',
                 schemes: ['fliggy://', 'taobaotravel://'],
+                androidIntent: 'intent://m.fliggy.com/#Intent;scheme=fliggy;package=com.taobao.trip;end',
                 webUrl: 'https://m.fliggy.com/',
-                hint: '1. 文案已复制 ✅\n2. 点击上方"打开飞猪"\n3. 我的 → 全部订单 → 找到订单 → 评价 → 粘贴',
+                hint: '1. 文案已复制 ✅\n2. 点“打开飞猪App”\n3. 飞猪 → 我的 → 全部订单 → 找到订单 → 评价 → 粘贴',
             }
         };
 
@@ -689,29 +692,24 @@
             const config = platformConfig[platform];
             if (!config) return;
 
-            // 现实很骨感：外部H5无法稳定直达美团/携程/飞猪“小程序点评页”。
-            // 这里做两件事：1）先尝试拉起App；2）失败后打开网页版/给手动路径。
+            // 外部H5无法稳定直达“订单点评页”。这里只做一件事：用户主动点击后尽量拉起App。
+            // 不自动跳网页版，避免跳到电脑端/无人维护页面。
             const hintBox = document.getElementById('jumpHint');
-            hintBox.innerHTML = `💡 <strong>已复制文案。</strong><br>${config.hint.replace(/\n/g, '<br>')}<br><br>如果没有自动打开，请手动打开${config.name} App/小程序，进入订单评价。`;
+            const ua = navigator.userAgent || '';
+            const isAndroid = /Android/i.test(ua);
+            const isWechat = /MicroMessenger/i.test(ua);
 
-            const scheme = config.schemes[0];
-            const start = Date.now();
+            hintBox.innerHTML = `💡 <strong>文案已复制。</strong><br>${config.hint.replace(/\n/g, '<br>')}<br><br>${isWechat ? '如果在微信里打不开App，请点右上角“…”选择浏览器打开。<br>' : ''}如果没有跳转，请手动打开${config.name}App → 我的/订单 → 待评价。<br><a href="${config.webUrl}" target="_blank" style="color:#2B7DE9;font-weight:700;">实在打不开？点这里进入${config.name}手机版网页</a>`;
 
-            // iOS/安卓浏览器对 scheme 支持都很抽风，尤其微信里会拦截。
             try {
-                window.location.href = scheme;
-            } catch (e) {}
-
-            // 如果没有离开当前页面，2秒后给网页版兜底。
-            setTimeout(() => {
-                if (Date.now() - start < 2600) {
-                    try {
-                        window.open(config.webUrl, '_blank');
-                    } catch (e) {
-                        window.location.href = config.webUrl;
-                    }
+                if (isAndroid && config.androidIntent) {
+                    window.location.href = config.androidIntent;
+                    return;
                 }
-            }, 2000);
+                window.location.href = config.schemes[0];
+            } catch (e) {
+                // 保持页面提示，不自动兜底。
+            }
         }
     </script>
 </body>
