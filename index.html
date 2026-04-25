@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>分享您的入住体验 ✨</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px 16px 40px;
+        }
+        .container { max-width: 420px; margin: 0 auto; }
+        .header { text-align: center; padding: 30px 0 20px; color: white; }
+        .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+        .header p { font-size: 13px; opacity: 0.9; }
+        .card {
+            background: white; border-radius: 16px; padding: 20px 18px;
+            margin-bottom: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-size: 15px; font-weight: 600; color: #333;
+            margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+        }
+        .card-title .icon { font-size: 18px; }
+        .rating-group { display: flex; gap: 10px; justify-content: center; }
+        .rating-btn {
+            flex: 1; height: 70px; border: 2px solid #e0e0e0; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; background: #fafafa;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .rating-btn.active { border-color: #667eea; background: #f0f0ff; transform: scale(1.03); }
+        .rating-btn .star { font-size: 22px; }
+        .rating-btn .label { font-size: 11px; color: #666; margin-top: 2px; }
+        .tag-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag-btn {
+            padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 18px;
+            background: #fafafa; cursor: pointer; font-size: 13px; transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tag-btn.active { border-color: #667eea; background: #667eea; color: white; }
+        .platform-group { display: flex; gap: 8px; }
+        .platform-btn {
+            flex: 1; padding: 10px 8px; border: 1.5px solid #e0e0e0; border-radius: 10px;
+            background: #fafafa; cursor: pointer; text-align: center; font-size: 13px;
+            transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+        }
+        .platform-btn.active { border-color: #667eea; background: #f0f0ff; }
+        .platform-btn .p-icon { font-size: 22px; display: block; margin-bottom: 3px; }
+        .generate-btn {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; border-radius: 12px; font-size: 17px;
+            font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+        .generate-btn:active { transform: scale(0.98); }
+        .generate-btn:disabled { background: #ccc; }
+        .result-area { display: none; }
+        .result-text {
+            background: #f8f8ff; border: 1px solid #e8e8ff; border-radius: 12px;
+            padding: 14px; font-size: 14px; line-height: 1.8; color: #333;
+            min-height: 100px; word-break: break-all; user-select: all;
+        }
+        .action-btns { display: flex; gap: 10px; margin-top: 12px; }
+        .copy-btn {
+            flex: 1.5; padding: 13px; background: #4CAF50; color: white;
+            border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+        .copy-btn.copied { background: #45a049; }
+        .regen-btn {
+            flex: 1; padding: 13px; background: #667eea; color: white;
+            border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+        .jump-area { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed #ddd; }
+        .jump-title { font-size: 14px; color: #666; margin-bottom: 10px; text-align: center; }
+        .jump-btns { display: flex; gap: 8px; }
+        .jump-btn {
+            flex: 1; padding: 12px 8px; border: none; border-radius: 10px;
+            color: white; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .jump-btn .j-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+        .jump-btn.meituan { background: #FFC107; color: #333; }
+        .jump-btn.ctrip { background: #2B7DE9; }
+        .jump-btn.fliggy { background: #FF6B35; }
+        .jump-hint {
+            margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 8px;
+            font-size: 12px; color: #856404; line-height: 1.6;
+        }
+        .footer { text-align: center; color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏨 分享您的入住体验</h1>
+            <p>简单几步，一键生成好评文案</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">⭐</span> 您的满意度</div>
+            <div class="rating-group">
+                <div class="rating-btn" data-score="5" onclick="selectRating(this)">
+                    <span class="star">⭐⭐⭐⭐⭐</span>
+                    <span class="label">非常满意</span>
+                </div>
+                <div class="rating-btn" data-score="4" onclick="selectRating(this)">
+                    <span class="star">⭐⭐⭐⭐</span>
+                    <span class="label">满意</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">✨</span> 哪些方面让您满意？（可多选）</div>
+            <div class="tag-group">
+                <div class="tag-btn" data-tag="卫生" onclick="toggleTag(this)">🧹 卫生干净</div>
+                <div class="tag-btn" data-tag="服务" onclick="toggleTag(this)">😊 服务热情</div>
+                <div class="tag-btn" data-tag="交通" onclick="toggleTag(this)">🚇 交通便利</div>
+                <div class="tag-btn" data-tag="性价比" onclick="toggleTag(this)">💰 性价比高</div>
+                <div class="tag-btn" data-tag="设施" onclick="toggleTag(this)">🛋️ 设施齐全</div>
+                <div class="tag-btn" data-tag="安静" onclick="toggleTag(this)">😴 安静舒适</div>
+                <div class="tag-btn" data-tag="早餐" onclick="toggleTag(this)">🍳 早餐好吃</div>
+                <div class="tag-btn" data-tag="床品" onclick="toggleTag(this)">🛏️ 床品舒服</div>
+                <div class="tag-btn" data-tag="热水" onclick="toggleTag(this)">🚿 热水充足</div>
+                <div class="tag-btn" data-tag="停车" onclick="toggleTag(this)">🅿️ 停车方便</div>
+                <div class="tag-btn" data-tag="周边" onclick="toggleTag(this)">🎯 周边好玩</div>
+                <div class="tag-btn" data-tag="WiFi" onclick="toggleTag(this)">📶 WiFi快</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="icon">📱</span> 发布到哪个平台？</div>
+            <div class="platform-group">
+                <div class="platform-btn active" data-platform="meituan" onclick="selectPlatform(this)">
+                    <span class="p-icon">🦘</span>美团
+                </div>
+                <div class="platform-btn" data-platform="ctrip" onclick="selectPlatform(this)">
+                    <span class="p-icon">🐬</span>携程
+                </div>
+                <div class="platform-btn" data-platform="fliggy" onclick="selectPlatform(this)">
+                    <span class="p-icon">🐷</span>飞猪
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <button class="generate-btn" id="generateBtn" onclick="generateReview()" disabled>
+                🎉 一键生成好评文案
+            </button>
+        </div>
+
+        <div class="card result-area" id="resultArea">
+            <div class="card-title"><span class="icon">📝</span> 您的好评文案</div>
+            <div class="result-text" id="resultText"></div>
+            <div class="action-btns">
+                <button class="copy-btn" id="copyBtn" onclick="copyAndJump()">📋 复制并跳转</button>
+                <button class="regen-btn" onclick="generateReview()">🔄 换一种</button>
+            </div>
+            <div class="jump-area" id="jumpArea">
+                <div class="jump-title">📍 下一步：去平台粘贴评价</div>
+                <div class="jump-btns">
+                    <button class="jump-btn meituan" onclick="jumpTo('meituan')">
+                        <span class="j-icon">🦘</span>打开美团
+                    </button>
+                    <button class="jump-btn ctrip" onclick="jumpTo('ctrip')">
+                        <span class="j-icon">🐬</span>打开携程
+                    </button>
+                    <button class="jump-btn fliggy" onclick="jumpTo('fliggy')">
+                        <span class="j-icon">🐷</span>打开飞猪
+                    </button>
+                </div>
+                <div class="jump-hint" id="jumpHint"></div>
+            </div>
+        </div>
+
+        <div class="footer">感谢您的真实评价 ❤️</div>
+    </div>
+
+    <script>
+        let selectedRating = 0;
+        let selectedTags = [];
+        let selectedPlatform = 'meituan';
+
+        // ========================================
+        // 100条+ 好评文案库
+        // ========================================
+        const reviews = {
+            卫生: [
+                "一进房间就闻到淡淡的清香，卫生做得非常到位，连角落都打扫得干干净净。床单被套都是新的，住得很安心。必须五星好评！",
+                "房间整洁得像样板间一样，地面光脚踩都没灰。卫生间马桶和淋浴间都消毒过了，毛巾也是独立包装的。这种卫生标准真的少见！",
+                "作为一个有洁癖的人，这家酒店完全符合我的要求。床品一客一换，桌面台面都擦得很干净，连遥控器都套了消毒袋。细节满分！",
+                "卫生这块真的要夸，比我住过的很多星级酒店都干净。地毯没有异味，窗帘也是洗过的，空调出风口没有积灰。看得出来用心了！",
+                "带孩子出来玩最看重卫生，这家完全过关。小朋友在地上爬来爬去我也不担心，消毒做得很到位。下次还选这家！",
+                "房间卫生无可挑剔，床品干爽柔软，枕头也很干净。卫生间没有水渍和异味，吹风机和毛巾都摆放得很整齐。给保洁阿姨点赞！",
+                "第一次来这边出差，选了这家酒店。卫生条件超出预期，房间明亮干净，卫生间干湿分离做得很好。住着很舒心！",
+                "卫生做得特别用心，房间每天都有打扫。连矿泉水都换了新的，垃圾也及时清理了。这种服务态度真的值得五星！",
+                "住过这么多酒店，这家卫生绝对排前三。地板拖得能照人，桌面没有水渍，垃圾桶每天都清空。细节决定品质！",
+                "一打开房门就被惊艳到了，干净得闪闪发光。床单平整没有褶皱，卫生间镜子上没有一点水痕。这种卫生标准我给满分！",
+                "作为一个出差狂人，对卫生要求很高。这家酒店真的让我满意，房间角落都打扫得很干净，床品柔软舒适。值得推荐！",
+                "带老人出来旅游，最担心的就是卫生问题。这家酒店完全打消了我的顾虑，房间干净整洁，卫生间也没有异味。老人家住得很舒服！",
+                "卫生这块真的没话说，比我自己家还干净。空调滤网是新的，窗帘没有灰尘，连门把手都消毒过。住得放心！",
+                "房间卫生条件一流，床品一客一换，枕套被罩都很干爽。卫生间做了深度清洁，洗漱用品都是新的。这种标准应该推广！",
+                "作为一个酒店控，这家卫生可以打9分。唯一扣1分是因为太干净了反而有点不习惯。开玩笑的，满分推荐！",
+            ],
+            服务: [
+                "前台小姐姐笑容超甜，办理入住只用了2分钟。还主动介绍了周边的美食和景点，服务态度没得说。下次还来！",
+                "从进门到退房，每个环节的服务都很到位。前台主动帮忙拿行李，还送了欢迎水果。这种贴心的服务真的少见！",
+                "入住期间有个小问题，打电话到前台，3分钟就有人上来解决了。响应速度超快，服务态度也很好。必须好评！",
+                "前台服务态度特别好，问什么都耐心解答。还帮忙叫了外卖送到房间，这种服务在连锁酒店里真的难得！",
+                "办理入住的时候前台小姐姐看我带了很多东西，主动帮忙提行李。这种细节真的很加分，住得很暖心！",
+                "退房的时候落下充电器，打电话到前台说帮我收好了，下次来取。这种诚信和贴心，真的值得推荐！",
+                "前台服务态度热情但不谄媚，让人感觉很舒服。入住时详细讲解了房间设施的使用方法，很专业！",
+                "住了三天，每天前台都会主动问有没有什么需要。这种主动关怀的服务，让我觉得物超所值！",
+                "酒店服务真的没话说，从入住到退房一路顺畅。前台记住了我的姓氏，每次见面都热情打招呼。这种被重视的感觉真好！",
+                "半夜到酒店，前台依然笑脸相迎，快速办理入住。还帮我升级了房型，说晚上到了注意休息。这种服务太贴心了！",
+                "带孩子入住，前台主动多给了两瓶矿泉水，还送了小玩具。这种对客人的关怀真的让人感动，五星好评！",
+                "出差选酒店最看重服务，这家完全超出预期。前台不仅帮忙寄存行李，还帮我叫了车。这种一站式服务太省心了！",
+                "酒店服务细节做得很好，房间打扫得很及时，前台每次见到都会打招呼。这种宾至如归的感觉，就是五星级的标准！",
+                "入住体验特别好，前台服务态度热情周到。有问题随时打电话，每次都能及时解决。这种高效的服务值得推荐！",
+                "住了好多次了，服务一如既往的好。前台能记住我的入住习惯，每次都提前准备好。这种VIP待遇真的难得！",
+            ],
+            交通: [
+                "出门就是地铁站，去哪都超级方便！去景点、去商圈都是几站路的事。位置太好了，省了不少打车费！",
+                "地理位置绝佳，步行5分钟到地铁站，10分钟到商业街。周边公交也很多，出行完全不用愁。这个位置值五星！",
+                "位置太方便了，对面就是公交站，旁边是地铁口。出差去各个地方都很近，不用赶时间。下次出差还选这里！",
+                "酒店位置真的绝了，走路到高铁站只要10分钟。对于赶火车的人来说简直是福音，再也不用担心迟到了！",
+                "交通超级便利，出门右转就是公交站，左转是地铁口。周边共享单车也多，去哪都方便。位置满分！",
+                "这个位置真的太方便了，去机场大巴就在旁边。早上赶飞机不用早起，多睡半小时太重要了！",
+                "酒店周边交通四通八达，地铁、公交、打车都很方便。去哪个景点都不远，玩累了随时回来休息。位置选得太对了！",
+                "带爸妈来旅游，最看重的就是交通便利。这家酒店完全满足需求，出门就是地铁，老人家不用走太多路。太方便了！",
+                "位置真的没话说，火车站走路就到。对于拖着行李箱的人来说，近就是最大的优势。五星好评！",
+                "酒店在市中心，但闹中取静。出门繁华，回房安静。这种黄金地段还能保持性价比，真的难得！",
+            ],
+            性价比: [
+                "这个价位能住到这么好的房间，真的是捡到宝了！装修新、设施全、卫生好，性价比无敌。已经推荐给同事了！",
+                "对比了周边好几家酒店，这家性价比最高。价格便宜但品质不输星级酒店，住得很满意。下次还选这家！",
+                "出差住酒店最怕贵，这家价格亲民但体验超出预期。该有的都有，不该省的一个没省。老板太良心了！",
+                "和朋友AA住这家酒店，人均不到100块。但是房间设施齐全，卫生干净，服务态度好。这性价比真的绝了！",
+                "周末出来玩预算有限，选了这家酒店。本来没抱太大期望，结果入住后惊喜连连。便宜但绝不廉价，超值！",
+                "带全家出来旅游，订了两间房。算下来比住一家贵的酒店省了一半，但体验一点不打折。性价比之王！",
+                "这个价格能住到带窗的房间，已经很意外了。没想到卫生和服务都这么好，真的是物超所值。强烈推荐给预算有限的朋友！",
+                "住了一个月长包房，算下来每天才一百出头。但每天回来都像住新酒店一样，保洁、换洗一样不少。长住首选！",
+                "第一次来这个城市，随便选了一家酒店。没想到性价比这么高，价格实惠品质好。下次来不用选了，就这家！",
+                "在OTA平台比价了很久，最终选了这家。入住后发现确实是同价位最好的选择，没有之一。性价比杠杠的！",
+            ],
+            设施: [
+                "房间设施很新，智能马桶、投影仪、蓝牙音箱都有。电视可以投屏，晚上在房间看电影太爽了。设施堪比精品酒店！",
+                "房间里该有的都有，迷你吧、保险箱、电热水壶一应俱全。甚至连熨斗和晾衣架都准备了，出差党的福音！",
+                "设施很现代化，智能客控系统，躺在床上就能调灯光和空调。淋浴是恒温的，水压也大。住得很舒服！",
+                "酒店设施维护得很好，电梯很快不卡顿，走廊灯光柔和不刺眼。房间的隔音也做得好，晚上完全不受打扰。",
+                "最惊喜的是房间里有小冰箱，夏天回来能喝到冰饮料太幸福了。还有USB充电口，不用带转换插头。细节满分！",
+                "健身房虽然不大但器材齐全，跑步机、哑铃都有。早上起来跑20分钟，一天精神满满。这种配套酒店不多见！",
+                "商务设施很完善，房间有大书桌和台灯，WiFi速度快。打印复印服务也有，出差办公完全没问题！",
+                "房间设施很贴心，床头有阅读灯和多个插座。窗帘是遮光的全遮光设计，白天也能睡得很香。考虑得很周到！",
+                "酒店有自助洗衣房和烘干机，对于长住的人来说太方便了。不用带一堆换洗衣服，随换随洗。这个设施必须夸！",
+                "停车场有充电桩，电动车充电很方便。大堂还有雨伞和充电器可以借用，这些便民设施真的很加分！",
+            ],
+            安静: [
+                "隔音做得特别好，走廊说话声完全听不到。晚上睡得很踏实，对于睡眠浅的人来说太重要了！",
+                "住了一晚，最惊喜的是安静程度。虽然在闹市区，但房间非常安静。窗户是双层隔音玻璃，效果一流！",
+                "隔壁房间住了一家人，但完全听不到声音。隔音墙做得很厚实，睡眠质量有保障。这个价位能做到这个隔音，良心！",
+                "选了一个靠里的房间，窗外是小区花园。晚上没有车声人声，安静得只能听到虫鸣。睡得太舒服了！",
+                "作为一个对声音敏感的人，这家酒店完全满足我的要求。空调声音很小，走廊地毯厚实，走路都没声音。满分！",
+                "之前住别家酒店被吵醒过，这次特意选了这家。果然没让我失望，一夜到天亮，连梦都没做几个。太安静了！",
+                "酒店远离主干道，周边都是住宅区。晚上特别安静，适合休息。白天拉开窗帘又能看到城市景观。位置选得太好了！",
+                "房间安静程度超出预期，连楼上走路的声音都听不到。对于出差需要保证睡眠质量的人来说，这家太合适了！",
+            ],
+            早餐: [
+                "早餐种类丰富得超出预期！中西式都有，现煮的面条和粥特别好吃。还有当地特色小吃，足不出户就能尝到地道美食！",
+                "作为一个吃货，这家酒店的早餐真的要夸。品种多、味道好、食材新鲜。特别是现煎的鸡蛋和油条，每天必吃！",
+                "酒店早餐太丰盛了，水果、面包、热菜、冷盘一应俱全。咖啡还是现磨的，品质堪比外面咖啡馆。早餐给满分！",
+                "带孩子来玩，早餐有专门的儿童区，有小朋友喜欢的麦片和果汁。大人也能吃到当地特色，一家人的口味都照顾到了！",
+                "早餐时间从6点半到9点半，对于早起赶行程的人来说太友好了。种类多品质好，吃完元气满满出发！",
+                "酒店的本地特色早餐太赞了，米粉、煎饼、豆腐脑都有。不用出门就能吃到地道的早餐，省时省力还省钱！",
+                "早餐的食材很新鲜，水果都是当季的，酸奶也很纯正。热菜种类多，每天换花样。连吃三天都不腻！",
+                "酒店早餐虽然不是自助餐，但现点现做的模式更精致。点了一碗牛肉面和一份三明治，味道都很棒。品质优于自助！",
+            ],
+            床品: [
+                "床垫软硬适中，躺上去整个人都被包裹住了。枕头高度刚好，支撑性很好。一觉睡到自然醒，出差疲劳一扫而空！",
+                "床品品质堪比五星级！床单是80支高支纱的，摸上去滑滑的。被子轻盈保暖，夏天开空调盖刚刚好。睡眠质量直线上升！",
+                "作为一个对床垫很挑剔的人，这家酒店的床垫真的让我满意。不会太软也不会太硬，脊椎得到了很好的支撑。推荐给所有腰不好的朋友！",
+                "房间有两张床，试了一下都很舒服。被子有薄厚两种可以选择，空调房里盖薄的刚刚好。床品品质超出这个价位的预期！",
+                "酒店的枕头太舒服了，记忆棉的材质，躺上去脖子完全放松。在家都没睡这么踏实过，下次出差专门为了这张床来！",
+                "床品干净舒适，床单平整没有褶皱。被子蓬松柔软，盖上很有安全感。一觉睡到天亮，连梦都没做几个。睡眠质量杠杠的！",
+                "床垫是独立弹簧的，翻身不会吵到旁边的人。对于浅睡眠的人来说太重要了。这个细节做得很用心！",
+                "床品一客一换，干净卫生没得说。关键是舒适度真的高，躺上去就不想起来。出差一个月，这是睡过最舒服的一张床！",
+            ],
+            热水: [
+                "热水出水快，水压大温度稳定。洗澡的时候水温不会忽冷忽热，这种体验真的难得。花洒出水细腻，洗澡变成了享受！",
+                "作为一个每天都要洗澡的人，酒店的热水系统让我很满意。即开即热，不用等。水压够大，冲澡特别爽！",
+                "酒店用的是空气能热水器，热水供应稳定。住了三天，每次洗澡水温都很稳定。这种基础设施做得好，真的加分！",
+                "热水太给力了！出差一天回来冲个热水澡，所有的疲劳都消失了。水压大温度合适，花洒出水均匀。浴室还有防滑垫，安全第一！",
+                "冬天来出差，最看重的就是热水。这家酒店的热水系统很给力，水温高水量足。洗澡的时候感觉自己在家一样。满分！",
+                "浴室热水系统很先进，有恒温控制。不用担心烫到或者凉到，老人小孩用起来也很安全。这种细节做得很到位！",
+            ],
+            停车: [
+                "停车场很大，完全不用担心没位置。而且是免费的，这个在市区太难得了。停车位宽敞，新手停车也没压力！",
+                "自驾过来最看重的就是停车。这家酒店有专属停车场，保安24小时值班。车子停在这里很安心，服务也很周到！",
+                "酒店旁边就是大型停车场，步行1分钟就到。而且住店客人有优惠，一天停车费才10块钱。比路边停车方便多了！",
+                "停车场有监控和照明，晚上停车很安全。酒店还帮忙指引停车位，服务很贴心。自驾出行的朋友选这里准没错！",
+                "带爸妈自驾出来玩，酒店停车位宽敞，老人家上下车很方便。停车场离电梯口近，不用拖着行李走太远。太方便了！",
+                "酒店有地下停车场，夏天停车不晒太阳。电梯直达楼层，不用拖着行李爬楼梯。这种设计对自驾客人太友好了！",
+            ],
+            周边: [
+                "酒店周边太丰富了！出门左转是美食街，右转是商业街。步行10分钟到景区，吃喝玩乐一站式解决。位置绝了！",
+                "周边有很多网红打卡点，步行都能到。晚上还有夜市和步行街，逛到半夜都不无聊。这种地段真的难得！",
+                "酒店旁边就是大型商场，吃饭购物看电影一站式解决。还有超市可以买日用品，出差长住完全不用愁。周边配套太完善了！",
+                "周边景点步行可达，不用打车就能玩遍大半城市。酒店还免费提供了旅游地图和攻略，太贴心了！",
+                "酒店附近有很多本地人推荐的美食店，跟着地图找都很容易。晚上散步去江边看夜景，浪漫又惬意。位置选得太好了！",
+                "周边交通便利，去哪都方便。旁边有银行、药店、便利店，生活所需一应俱全。住在这里就像住在自己家一样方便！",
+                "酒店周边绿化很好，旁边就是公园。早上起来去跑步呼吸新鲜空气，一天都有好心情。闹中取静的位置太赞了！",
+                "带小朋友来玩，周边有游乐园和动物园。步行就能到，不用赶路。小朋友玩得开心，大人也轻松。亲子游首选！",
+            ],
+            WiFi: [
+                "WiFi速度太快了！看4K视频完全不卡，下载文件几分钟搞定。对于出差办公的人来说，这个网速太重要了！",
+                "酒店WiFi信号满格，在房间每个角落都能连上。网速测试达到了100Mbps，比我家的宽带还快。这个必须夸！",
+                "作为一个网络重度用户，这家酒店的WiFi让我很满意。打游戏不卡，看视频不缓冲，视频会议也很流畅。网速杠杠的！",
+                "酒店WiFi免费且不需要登录，连上就能用。速度稳定，用了三天没有出现断线的情况。这种网络质量在同价位酒店里算顶尖了！",
+                "出差最看重的就是网速，这家完全过关。房间有网线接口也有WiFi，双保险。开视频会议完全不卡，办公效率杠杠的！",
+                "WiFi速度超出预期，下载速度能达到50MB/s。看剧、办公、打游戏都没问题。房间还配了路由器信号放大器，每个角落信号都好！",
+            ],
+            通用: [
+                "第一次来这边出差，朋友推荐了这家酒店。入住后发现确实不错，房间干净舒适，服务热情周到。已经推荐给了同行的小伙伴！",
+                "住了三天，每天回来都有回家的感觉。房间打扫得很及时，前台每次见到都会热情打招呼。这种温馨的氛围真的难得！",
+                "对比了很多家酒店，最终选了这家。入住后觉得选择太正确了，性价比超高。房间设施齐全，卫生干净，服务到位。五星好评！",
+                "第二次入住了，品质一如既往。前台还记得我，主动帮我安排了高楼层的房间。这种被重视的感觉，就是我再来的理由！",
+                "酒店整体环境很好，大堂明亮宽敞，走廊干净整洁。房间布局合理，采光通风都不错。住着很舒心，下次还会选择！",
+                "带家人来旅游，选这家酒店真的选对了。房间够大，床够舒服，周边吃喝玩乐都方便。一家人都很满意，五星推荐！",
+                "酒店虽然不大，但五脏俱全。每个细节都做得很到位，从入住到退房一路顺畅。这种小而美的酒店，值得被更多人知道！",
+                "出差选酒店这么多年，这家是性价比最高的。价格实惠但品质不打折，该有的设施都有。已经成了我的定点酒店！",
+                "入住体验超出预期，本来只期望睡一觉，结果住得很舒服。房间干净明亮，床品柔软舒适。这种惊喜感就是旅行的意义！",
+                "酒店的位置、价格、服务都很均衡，没有明显的短板。这种全面发展型的酒店，适合各种需求的客人。推荐！",
+                "住了一个星期，每天都过得很舒心。酒店服务到位，房间舒适，周边方便。这种全方位的满意，不是每家酒店都能给的！",
+                "带客户来这边谈生意，选了这家酒店接待。客户很满意，夸我会选酒店。这种面子工程，这家酒店真的帮我撑起来了！",
+                "酒店的每一个细节都透露出用心，从大堂的绿植到房间的香薰。这种品质感，让这个价位的住宿体验有了越级的感受！",
+                "住了一个月长包房，酒店给了我很多优惠和关怀。每天回来房间都打扫得干干净净，这种待遇真的让人感动！",
+                "从预订到入住到退房，整个过程非常顺畅。OTA平台上的信息和实际完全一致，没有夸大宣传。这种诚信经营的态度值得表扬！",
+            ],
+        };
+
+        // 平台跳转配置
+        const platformConfig = {
+            meituan: {
+                name: '美团',
+                schemes: ['imeituan://www.meituan.com', 'meituan://'],
+                webUrl: 'https://i.meituan.com/hotel/',
+                hint: '1. 文案已复制 ✅\n2. 点击上方"打开美团"\n3. 我的 → 待评价 → 粘贴文案 → 提交',
+            },
+            ctrip: {
+                name: '携程',
+                schemes: ['ctrip://', 'ctripg://'],
+                webUrl: 'https://m.ctrip.com/webapp/myctrip/orderList.html',
+                hint: '1. 文案已复制 ✅\n2. 点击上方"打开携程"\n3. 我的 → 全部订单 → 找到订单 → 评价 → 粘贴',
+            },
+            fliggy: {
+                name: '飞猪',
+                schemes: ['fliggy://', 'taobaotravel://'],
+                webUrl: 'https://m.fliggy.com/',
+                hint: '1. 文案已复制 ✅\n2. 点击上方"打开飞猪"\n3. 我的 → 全部订单 → 找到订单 → 评价 → 粘贴',
+            }
+        };
+
+        function selectRating(el) {
+            document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            selectedRating = parseInt(el.dataset.score);
+            updateBtn();
+        }
+
+        function toggleTag(el) {
+            el.classList.toggle('active');
+            const tag = el.dataset.tag;
+            if (selectedTags.includes(tag)) {
+                selectedTags = selectedTags.filter(t => t !== tag);
+            } else {
+                selectedTags.push(tag);
+            }
+            updateBtn();
+        }
+
+        function selectPlatform(el) {
+            document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            selectedPlatform = el.dataset.platform;
+        }
+
+        function updateBtn() {
+            document.getElementById('generateBtn').disabled = !(selectedRating > 0);
+        }
+
+        // 已使用的文案索引，避免重复
+        let usedIndices = {};
+
+        function generateReview() {
+            let pool = [];
+
+            // 根据选中的标签收集文案
+            if (selectedTags.length > 0) {
+                selectedTags.forEach(tag => {
+                    if (reviews[tag]) {
+                        pool = pool.concat(reviews[tag].map((text, i) => ({ text, tag, index: i })));
+                    }
+                });
+            }
+
+            // 如果标签池不够，补充通用文案
+            if (pool.length < 5) {
+                pool = pool.concat(reviews['通用'].map((text, i) => ({ text, tag: '通用', index: i })));
+            }
+
+            // 过滤已使用的
+            let available = pool.filter(item => {
+                const key = item.tag + '-' + item.index;
+                return !usedIndices[key];
+            });
+
+            // 如果全部用完了，重置
+            if (available.length === 0) {
+                usedIndices = {};
+                available = pool;
+            }
+
+            // 随机选一条
+            const selected = available[Math.floor(Math.random() * available.length)];
+            usedIndices[selected.tag + '-' + selected.index] = true;
+
+            let text = selected.text;
+
+            // 根据评分微调
+            if (selectedRating === 4) {
+                text = text.replace(/五星好评/g, '好评').replace(/满分/g, '高分').replace(/五星/g, '四星');
+                text = text.replace(/超出预期/g, '符合预期').replace(/太惊喜了/g, '还不错');
+            }
+
+            document.getElementById('resultText').textContent = text;
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('jumpArea').style.display = 'block';
+
+            highlightJumpBtn(selectedPlatform);
+            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const copyBtn = document.getElementById('copyBtn');
+            copyBtn.textContent = '📋 复制并跳转';
+            copyBtn.classList.remove('copied');
+        }
+
+        function highlightJumpBtn(platform) {
+            document.querySelectorAll('.jump-btn').forEach(btn => {
+                btn.style.opacity = '0.4';
+                btn.style.transform = 'scale(0.95)';
+            });
+            const activeBtn = document.querySelector(`.jump-btn.${platform}`);
+            if (activeBtn) {
+                activeBtn.style.opacity = '1';
+                activeBtn.style.transform = 'scale(1)';
+            }
+            const config = platformConfig[platform];
+            document.getElementById('jumpHint').innerHTML = `💡 <strong>操作指引：</strong><br>${config.hint.replace(/\n/g, '<br>')}`;
+        }
+
+        async function copyAndJump() {
+            const text = document.getElementById('resultText').textContent;
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch (e) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            }
+
+            const copyBtn = document.getElementById('copyBtn');
+            copyBtn.textContent = '✅ 已复制！';
+            copyBtn.classList.add('copied');
+
+            document.getElementById('jumpArea').style.display = 'block';
+            highlightJumpBtn(selectedPlatform);
+
+            // 1.5秒后自动尝试跳转
+            setTimeout(() => jumpTo(selectedPlatform), 1500);
+        }
+
+        function jumpTo(platform) {
+            const config = platformConfig[platform];
+            if (!config) return;
+
+            // 现实很骨感：外部H5无法稳定直达美团/携程/飞猪“小程序点评页”。
+            // 这里做两件事：1）先尝试拉起App；2）失败后打开网页版/给手动路径。
+            const hintBox = document.getElementById('jumpHint');
+            hintBox.innerHTML = `💡 <strong>已复制文案。</strong><br>${config.hint.replace(/
+/g, '<br>')}<br><br>如果没有自动打开，请手动打开${config.name} App/小程序，进入订单评价。`;
+
+            const scheme = config.schemes[0];
+            const start = Date.now();
+
+            // iOS/安卓浏览器对 scheme 支持都很抽风，尤其微信里会拦截。
+            try {
+                window.location.href = scheme;
+            } catch (e) {}
+
+            // 如果没有离开当前页面，2秒后给网页版兜底。
+            setTimeout(() => {
+                if (Date.now() - start < 2600) {
+                    try {
+                        window.open(config.webUrl, '_blank');
+                    } catch (e) {
+                        window.location.href = config.webUrl;
+                    }
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
