@@ -29,7 +29,8 @@
             flex: 1; height: 70px; border: 2px solid #e0e0e0; border-radius: 12px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; background: #fafafa;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; appearance: none; -webkit-appearance: none;
+            font-family: inherit; touch-action: manipulation;
         }
         .rating-btn.active { border-color: #667eea; background: #f0f0ff; transform: scale(1.03); }
         .rating-btn .star { font-size: 22px; }
@@ -38,7 +39,8 @@
         .tag-btn {
             padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 18px;
             background: #fafafa; cursor: pointer; font-size: 13px; transition: all 0.2s;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; appearance: none; -webkit-appearance: none;
+            font-family: inherit; touch-action: manipulation;
         }
         .tag-btn.active { border-color: #667eea; background: #667eea; color: white; }
         .platform-group { display: flex; gap: 8px; }
@@ -46,6 +48,7 @@
             flex: 1; padding: 10px 8px; border: 1.5px solid #e0e0e0; border-radius: 10px;
             background: #fafafa; cursor: pointer; text-align: center; font-size: 13px;
             transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+            appearance: none; -webkit-appearance: none; font-family: inherit; touch-action: manipulation;
         }
         .platform-btn.active { border-color: #667eea; background: #f0f0ff; }
         .platform-btn .p-icon { font-size: 22px; display: block; margin-bottom: 3px; }
@@ -104,47 +107,47 @@
         <div class="card">
             <div class="card-title"><span class="icon">⭐</span> 您的满意度</div>
             <div class="rating-group">
-                <div class="rating-btn" data-score="5" onclick="selectRating(this)">
+                <button type="button" class="rating-btn" data-score="5" onclick="selectRating(this)">
                     <span class="star">⭐⭐⭐⭐⭐</span>
                     <span class="label">非常满意</span>
-                </div>
-                <div class="rating-btn" data-score="4" onclick="selectRating(this)">
+                </button>
+                <button type="button" class="rating-btn" data-score="4" onclick="selectRating(this)">
                     <span class="star">⭐⭐⭐⭐</span>
                     <span class="label">满意</span>
-                </div>
+                </button>
             </div>
         </div>
 
         <div class="card">
             <div class="card-title"><span class="icon">✨</span> 哪些方面让您满意？（可多选）</div>
             <div class="tag-group">
-                <div class="tag-btn" data-tag="卫生" onclick="toggleTag(this)">🧹 卫生干净</div>
-                <div class="tag-btn" data-tag="服务" onclick="toggleTag(this)">😊 服务热情</div>
-                <div class="tag-btn" data-tag="交通" onclick="toggleTag(this)">🚇 交通便利</div>
-                <div class="tag-btn" data-tag="性价比" onclick="toggleTag(this)">💰 性价比高</div>
-                <div class="tag-btn" data-tag="设施" onclick="toggleTag(this)">🛋️ 设施齐全</div>
-                <div class="tag-btn" data-tag="安静" onclick="toggleTag(this)">😴 安静舒适</div>
-                <div class="tag-btn" data-tag="早餐" onclick="toggleTag(this)">🍳 早餐好吃</div>
-                <div class="tag-btn" data-tag="床品" onclick="toggleTag(this)">🛏️ 床品舒服</div>
-                <div class="tag-btn" data-tag="热水" onclick="toggleTag(this)">🚿 热水充足</div>
-                <div class="tag-btn" data-tag="停车" onclick="toggleTag(this)">🅿️ 停车方便</div>
-                <div class="tag-btn" data-tag="周边" onclick="toggleTag(this)">🎯 周边好玩</div>
-                <div class="tag-btn" data-tag="WiFi" onclick="toggleTag(this)">📶 WiFi快</div>
+                <button type="button" class="tag-btn" data-tag="卫生" onclick="toggleTag(this)">🧹 卫生干净</button>
+                <button type="button" class="tag-btn" data-tag="服务" onclick="toggleTag(this)">😊 服务热情</button>
+                <button type="button" class="tag-btn" data-tag="交通" onclick="toggleTag(this)">🚇 交通便利</button>
+                <button type="button" class="tag-btn" data-tag="性价比" onclick="toggleTag(this)">💰 性价比高</button>
+                <button type="button" class="tag-btn" data-tag="设施" onclick="toggleTag(this)">🛋️ 设施齐全</button>
+                <button type="button" class="tag-btn" data-tag="安静" onclick="toggleTag(this)">😴 安静舒适</button>
+                <button type="button" class="tag-btn" data-tag="早餐" onclick="toggleTag(this)">🍳 早餐好吃</button>
+                <button type="button" class="tag-btn" data-tag="床品" onclick="toggleTag(this)">🛏️ 床品舒服</button>
+                <button type="button" class="tag-btn" data-tag="热水" onclick="toggleTag(this)">🚿 热水充足</button>
+                <button type="button" class="tag-btn" data-tag="停车" onclick="toggleTag(this)">🅿️ 停车方便</button>
+                <button type="button" class="tag-btn" data-tag="周边" onclick="toggleTag(this)">🎯 周边好玩</button>
+                <button type="button" class="tag-btn" data-tag="WiFi" onclick="toggleTag(this)">📶 WiFi快</button>
             </div>
         </div>
 
         <div class="card">
             <div class="card-title"><span class="icon">📱</span> 发布到哪个平台？</div>
             <div class="platform-group">
-                <div class="platform-btn active" data-platform="meituan" onclick="selectPlatform(this)">
+                <button type="button" class="platform-btn active" data-platform="meituan" onclick="selectPlatform(this)">
                     <span class="p-icon">🦘</span>美团
-                </div>
-                <div class="platform-btn" data-platform="ctrip" onclick="selectPlatform(this)">
+                </button>
+                <button type="button" class="platform-btn" data-platform="ctrip" onclick="selectPlatform(this)">
                     <span class="p-icon">🐬</span>携程
-                </div>
-                <div class="platform-btn" data-platform="fliggy" onclick="selectPlatform(this)">
+                </button>
+                <button type="button" class="platform-btn" data-platform="fliggy" onclick="selectPlatform(this)">
                     <span class="p-icon">🐷</span>飞猪
-                </div>
+                </button>
             </div>
         </div>
 
@@ -364,6 +367,11 @@
                 hint: '1. 文案已复制 ✅\n2. 点击上方"打开飞猪"\n3. 我的 → 全部订单 → 找到订单 → 评价 → 粘贴',
             }
         };
+
+        function safeTap(fn, el, ev) {
+            if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+            fn(el);
+        }
 
         function selectRating(el) {
             document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('active'));
