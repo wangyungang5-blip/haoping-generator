@@ -504,8 +504,7 @@
             // 现实很骨感：外部H5无法稳定直达美团/携程/飞猪“小程序点评页”。
             // 这里做两件事：1）先尝试拉起App；2）失败后打开网页版/给手动路径。
             const hintBox = document.getElementById('jumpHint');
-            hintBox.innerHTML = `💡 <strong>已复制文案。</strong><br>${config.hint.replace(/
-/g, '<br>')}<br><br>如果没有自动打开，请手动打开${config.name} App/小程序，进入订单评价。`;
+            hintBox.innerHTML = `💡 <strong>已复制文案。</strong><br>${config.hint.replace(/\n/g, '<br>')}<br><br>如果没有自动打开，请手动打开${config.name} App/小程序，进入订单评价。`;
 
             const scheme = config.schemes[0];
             const start = Date.now();
