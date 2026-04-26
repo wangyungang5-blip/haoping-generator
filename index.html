@@ -95,6 +95,16 @@
             font-size: 12px; color: #856404; line-height: 1.6;
         }
         .footer { text-align: center; color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 16px; }
+
+        .wechat-guide {
+            display: none; margin-bottom: 14px; padding: 14px 16px;
+            background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            border: 2px solid #22c55e; color: #333;
+        }
+        .wechat-guide.show { display: block; }
+        .wechat-guide .wg-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #15803d; }
+        .wechat-guide .wg-steps { font-size: 13px; line-height: 1.8; color: #444; }
+        .wechat-guide .wg-tip { margin-top: 8px; font-size: 12px; color: #856404; background:#fff3cd; padding:8px; border-radius:8px; }
     </style>
 </head>
 <body>
@@ -102,6 +112,17 @@
         <div class="header">
             <h1>🏨 分享您的入住体验</h1>
             <p>简单几步，一键生成好评文案</p>
+        </div>
+
+        <div class="wechat-guide" id="wechatGuide">
+            <div class="wg-title">⚠️ 当前在微信里打开</div>
+            <div class="wg-steps">
+                微信会拦截自动跳转 App。想顺利打开美团/携程：<br>
+                1. 点右上角 <strong>“…”</strong><br>
+                2. 选择 <strong>“在浏览器打开”</strong><br>
+                3. 回到本页点 <strong>打开美团App/携程App</strong>
+            </div>
+            <div class="wg-tip">不是网页坏了，是微信怕你乱跳，管得比前台还宽。</div>
         </div>
 
         <div class="card">
@@ -188,6 +209,23 @@
         let selectedRating = 0;
         let selectedTags = [];
         let selectedPlatform = 'meituan';
+
+        function getEnv() {
+            const ua = navigator.userAgent || '';
+            return {
+                ua,
+                isWechat: /MicroMessenger/i.test(ua),
+                isAndroid: /Android/i.test(ua),
+                isIOS: /iPhone|iPad|iPod/i.test(ua)
+            };
+        }
+
+        function showWechatGuideIfNeeded() {
+            const guide = document.getElementById('wechatGuide');
+            if (guide && getEnv().isWechat) guide.classList.add('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', showWechatGuideIfNeeded);
 
         // ========================================
         // 100条+ 好评文案库
@@ -660,7 +698,10 @@
                 activeBtn.style.transform = 'scale(1)';
             }
             const config = platformConfig[platform];
-            document.getElementById('jumpHint').innerHTML = `💡 <strong>操作指引：</strong><br>${config.hint.replace(/\n/g, '<br>')}`;
+            const env = getEnv();
+            document.getElementById('jumpHint').innerHTML = env.isWechat
+                ? `💡 <strong>文案已复制。</strong><br>当前在微信里，微信通常会拦截打开App。<br><strong>请点右上角“…” → 在浏览器打开</strong>，再点下方打开${config.name}App。`
+                : `💡 <strong>操作指引：</strong><br>${config.hint.replace(/\n/g, '<br>')}`;
         }
 
         async function copyAndJump() {
@@ -692,17 +733,23 @@
             const config = platformConfig[platform];
             if (!config) return;
 
-            // 外部H5无法稳定直达“订单点评页”。这里只做一件事：用户主动点击后尽量拉起App。
-            // 不自动跳网页版，避免跳到电脑端/无人维护页面。
             const hintBox = document.getElementById('jumpHint');
-            const ua = navigator.userAgent || '';
-            const isAndroid = /Android/i.test(ua);
-            const isWechat = /MicroMessenger/i.test(ua);
+            const env = getEnv();
 
-            hintBox.innerHTML = `💡 <strong>文案已复制。</strong><br>${config.hint.replace(/\n/g, '<br>')}<br><br>${isWechat ? '如果在微信里打不开App，请点右上角“…”选择浏览器打开。<br>' : ''}如果没有跳转，请手动打开${config.name}App → 我的/订单 → 待评价。<br><a href="${config.webUrl}" target="_blank" style="color:#2B7DE9;font-weight:700;">实在打不开？点这里进入${config.name}手机版网页</a>`;
+            // 微信内置浏览器不允许网页自动切到系统浏览器，也经常拦截App Scheme。
+            // 所以微信里不硬跳，直接给大号步骤，减少客人点到死。
+            if (env.isWechat) {
+                const guide = document.getElementById('wechatGuide');
+                if (guide) guide.classList.add('show');
+                hintBox.innerHTML = `💡 <strong>微信里打不开App是正常限制。</strong><br>请点右上角“…” → <strong>在浏览器打开</strong>。<br>浏览器打开后，再点“打开${config.name}App”。<br><br>文案已经复制好，打开${config.name}后走：我的/订单 → 待评价 → 粘贴提交。`;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            hintBox.innerHTML = `💡 <strong>正在尝试打开${config.name}App。</strong><br>${config.hint.replace(/\n/g, '<br>')}<br><br>如果没有跳转，请手动打开${config.name}App → 我的/订单 → 待评价。<br><a href="${config.webUrl}" target="_blank" style="color:#2B7DE9;font-weight:700;">实在打不开？点这里进入${config.name}手机版网页</a>`;
 
             try {
-                if (isAndroid && config.androidIntent) {
+                if (env.isAndroid && config.androidIntent) {
                     window.location.href = config.androidIntent;
                     return;
                 }
