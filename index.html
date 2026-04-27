@@ -941,7 +941,35 @@
             box.innerHTML = `<strong>酒店端没看到？点这里：</strong><br>当前是无服务器演示版，跨设备不会自动同步。<br><a href="${adminUrl.toString()}">提交到酒店端审核</a><br><span class="small-muted">正式经营版接腾讯云后，这一步会自动完成。</span>`;
         }
         // 酒店端后台已拆分到 admin.html。
-        document.addEventListener('DOMContentLoaded', initHotel);
+
+        function importPointsFromHash(){
+            if(!location.hash || !location.hash.startsWith('#points=')) return;
+            try{
+                const raw = decodeURIComponent(location.hash.slice(8));
+                const item = JSON.parse(decodeURIComponent(escape(atob(raw))));
+                const members = getMembers();
+                const m = members[item.phone] || { points:0, logs:[] };
+                const applyKey = 'approved_' + item.id;
+                m.applied = m.applied || {};
+                if(!m.applied[applyKey]){
+                    m.points = (m.points || 0) + (item.points || 10);
+                    m.logs = m.logs || [];
+                    m.logs.push({ time: nowText(), text: `${item.hotel_name || getHotel().name} 点评审核通过 +${item.points || 10}积分` });
+                    m.applied[applyKey] = true;
+                    members[item.phone] = m;
+                    setMembers(members);
+                    const phoneInput = document.getElementById('guestPhone');
+                    if(phoneInput) phoneInput.value = item.phone || '';
+                    alert('积分已到账：+' + (item.points || 10) + ' 分');
+                    setTimeout(loadMember, 80);
+                } else {
+                    alert('这笔积分已经到账，不能重复领取。');
+                }
+                history.replaceState(null,'',location.pathname+location.search);
+            }catch(e){ alert('积分到账链接无效，请联系酒店处理。'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', ()=>{ initHotel(); importPointsFromHash(); });
 
     </script>
 </body>
