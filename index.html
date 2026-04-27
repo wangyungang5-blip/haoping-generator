@@ -873,7 +873,6 @@
             document.getElementById('hotelName').textContent = hotel.name;
             document.getElementById('hotelIdText').textContent = 'hotel_id: ' + getHotelId();
             renderRights(0);
-            renderAdmin();
             recordEvent('scan');
         }
         function recordEvent(type){
@@ -914,30 +913,10 @@
                 id: 'R' + Date.now(), hotel_id:getHotelId(), hotel_name:hotel.name, phone, platform:selectedPlatform,
                 points: hotel.rewardPoints || 10, status:'pending', time:nowText(), text: document.getElementById('resultText')?.textContent || '', fileName:file.name
             };
-            reviews.push(item); setReviews(reviews); recordEvent('proof'); renderAdmin();
-            alert('已提交审核。演示版可在“酒店端数据预览”里点通过，正式版会进入酒店后台。');
+            reviews.push(item); setReviews(reviews); recordEvent('proof');
+            alert('已提交审核。酒店审核通过后积分到账。');
         }
-        function approveReview(id){
-            const reviews = getReviews();
-            const members = getMembers();
-            const item = reviews.find(x=>x.id===id); if(!item || item.status==='approved') return;
-            item.status = 'approved'; item.approvedAt = nowText();
-            const m = members[item.phone] || { points:0, logs:[] };
-            m.points = (m.points||0) + item.points;
-            m.logs = m.logs || [];
-            m.logs.push({ time:nowText(), text:`${item.hotel_name} 完成真实入住反馈 +${item.points}积分` });
-            members[item.phone] = m;
-            setReviews(reviews); setMembers(members); recordEvent('approved'); renderAdmin();
-            if(getPhone()===item.phone) loadMember();
-        }
-        function toggleAdmin(){ document.getElementById('adminPanel').classList.toggle('show'); renderAdmin(); }
-        function renderAdmin(){
-            const panel = document.getElementById('adminPanel'); if(!panel) return;
-            const id=getHotelId(); const stats=(readStore('stats', {})[id] || {});
-            document.getElementById('adminStats').innerHTML = `扫码 ${stats.scan||0}｜生成 ${stats.generate||0}｜复制 ${stats.copy||0}｜跳转 ${stats.jump||0}｜上传凭证 ${stats.proof||0}｜审核通过 ${stats.approved||0}`;
-            const rows = getReviews().filter(x=>x.hotel_id===id).slice(-20).reverse();
-            document.getElementById('adminRows').innerHTML = rows.map(r => `<tr><td>${r.phone}<br><span class="small-muted">${r.time}</span></td><td>${r.platform}<br><span class="status-pill ${r.status==='approved'?'ok':''}">${r.status==='approved'?'已通过':'待审核'}</span><br><span class="small-muted">${r.fileName||''}</span></td><td>${r.points}</td><td class="admin-actions">${r.status==='approved'?'已发放':`<button onclick="approveReview('${r.id}')">通过并发积分</button>`}</td></tr>`).join('') || '<tr><td colspan="4" class="small-muted">暂无记录</td></tr>';
-        }
+        // 酒店端后台已拆分到 admin.html。
         document.addEventListener('DOMContentLoaded', initHotel);
 
     </script>
