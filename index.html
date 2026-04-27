@@ -116,7 +116,10 @@
         .field label { display:block; font-size:13px; color:#555; margin-bottom:6px; font-weight:600; }
         .field input { width:100%; padding:12px; border:1.5px solid #e5e5e5; border-radius:10px; font-size:15px; outline:none; }
         .field input:focus { border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,.12); }
-        .upload-box { border:1.5px dashed #b8c0ff; background:#f8f8ff; border-radius:12px; padding:14px; text-align:center; color:#555; font-size:13px; line-height:1.7; }
+        .upload-box { border:1.5px dashed #b8c0ff; background:#f8f8ff; border-radius:12px; padding:18px 14px; text-align:center; color:#555; font-size:13px; line-height:1.7; cursor:pointer; }
+        .upload-box:active { transform:scale(.99); background:#f0f2ff; }
+        .upload-icon { font-size:30px; display:block; margin-bottom:6px; }
+        .upload-file-name { margin-top:8px; color:#2B7DE9; font-weight:700; font-size:12px; }
         .upload-box input { width:100%; margin-top:10px; }
         .primary-soft-btn { width:100%; padding:13px; background:#2B7DE9; color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; }
         .primary-soft-btn:active { transform:scale(.98); }
@@ -258,10 +261,12 @@
                 <label>手机号 / 会员识别</label>
                 <input id="guestPhone" inputmode="tel" maxlength="20" placeholder="请输入手机号，用于查看积分和核销权益">
             </div>
-            <div class="upload-box">
-                上传点评成功截图<br>
-                <span class="small-muted">第一版先用截图审核，后续接腾讯云服务器后可进入酒店后台统一审核。</span>
-                <input id="proofImage" type="file" accept="image/*">
+            <div class="upload-box" onclick="document.getElementById('proofImage').click()">
+                <span class="upload-icon">📷</span>
+                <strong>点击这里上传点评成功截图</strong><br>
+                <span class="small-muted">发完点评后，直接点这个框选择截图。</span>
+                <input id="proofImage" type="file" accept="image/*" style="display:none" onchange="showProofFileName(this)">
+                <div class="upload-file-name" id="proofFileName"></div>
             </div>
             <button class="primary-soft-btn" style="margin-top:12px;" onclick="submitProof()">点评完成后点这里：提交截图领取 10 积分</button>
             <button class="secondary-btn" onclick="loadMember()">查看我的积分 / 权益券</button>
@@ -901,6 +906,10 @@
             renderRights(m.points || 0);
             document.getElementById('pointsLog').innerHTML = (m.logs||[]).slice(-5).reverse().map(x => `• ${x.time} ${x.text}`).join('<br>') || '暂无积分记录';
             document.getElementById('memberCard').scrollIntoView({behavior:'smooth', block:'center'});
+        }
+        function showProofFileName(input){
+            const box = document.getElementById('proofFileName');
+            if (box) box.textContent = input.files && input.files[0] ? '已选择：' + input.files[0].name : '';
         }
         function submitProof(){
             const phone = getPhone();
