@@ -120,6 +120,9 @@
         .upload-box:active { transform:scale(.99); background:#f0f2ff; }
         .upload-icon { font-size:30px; display:block; margin-bottom:6px; }
         .upload-file-name { margin-top:8px; color:#2B7DE9; font-weight:700; font-size:12px; }
+        .review-share-box { display:none; margin-top:12px; padding:12px; background:#eef8ff; border:1px solid #b8ddff; border-radius:12px; font-size:13px; line-height:1.7; color:#1f3b57; }
+        .review-share-box.show { display:block; }
+        .review-share-box a { color:#2B7DE9; font-weight:800; }
         .upload-box input { width:100%; margin-top:10px; }
         .primary-soft-btn { width:100%; padding:13px; background:#2B7DE9; color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; }
         .primary-soft-btn:active { transform:scale(.98); }
@@ -269,6 +272,7 @@
                 <div class="upload-file-name" id="proofFileName"></div>
             </div>
             <button class="primary-soft-btn" style="margin-top:12px;" onclick="submitProof()">点评完成后点这里：提交截图领取 10 积分</button>
+            <div class="review-share-box" id="reviewShareBox"></div>
             <button class="secondary-btn" onclick="loadMember()">查看我的积分 / 权益券</button>
         </div>
 
@@ -923,7 +927,18 @@
                 points: hotel.rewardPoints || 10, status:'pending', time:nowText(), text: document.getElementById('resultText')?.textContent || '', fileName:file.name
             };
             reviews.push(item); setReviews(reviews); recordEvent('proof');
-            alert('已提交审核。酒店审核通过后积分到账。');
+            showReviewTransfer(item);
+            alert('已提交凭证。演示版如酒店端看不到，请点页面里的“提交到酒店端审核”。正式版接腾讯云后会自动同步。');
+        }
+        function showReviewTransfer(item){
+            const box = document.getElementById('reviewShareBox');
+            if(!box) return;
+            const payload = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(item)))));
+            const adminUrl = new URL('admin.html', location.href);
+            adminUrl.search = location.search;
+            adminUrl.hash = 'review=' + payload;
+            box.classList.add('show');
+            box.innerHTML = `<strong>酒店端没看到？点这里：</strong><br>当前是无服务器演示版，跨设备不会自动同步。<br><a href="${adminUrl.toString()}">提交到酒店端审核</a><br><span class="small-muted">正式经营版接腾讯云后，这一步会自动完成。</span>`;
         }
         // 酒店端后台已拆分到 admin.html。
         document.addEventListener('DOMContentLoaded', initHotel);

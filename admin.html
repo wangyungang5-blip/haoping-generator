@@ -49,6 +49,21 @@ function qs(){return new URLSearchParams(location.search)}function hotelId(){ret
 function approve(id){const rs=read('reviews',[]), ms=read('members',{}); const r=rs.find(x=>x.id===id); if(!r||r.status==='approved')return; r.status='approved'; r.approvedAt=now(); const m=ms[r.phone]||{points:0,logs:[]}; m.points=(m.points||0)+(r.points||10); m.logs=m.logs||[]; m.logs.push({time:now(),text:`${r.hotel_name||hotel().name} 完成真实入住反馈 +${r.points||10}积分`}); ms[r.phone]=m; write('reviews',rs); write('members',ms); const st=read('stats',{}); st[hotelId()]=st[hotelId()]||{}; st[hotelId()].approved=(st[hotelId()].approved||0)+1; write('stats',st); render()}
 function reject(id){const rs=read('reviews',[]); const r=rs.find(x=>x.id===id); if(r){r.status='rejected'; r.rejectedAt=now(); write('reviews',rs)} render()}
 function clearDemo(){if(confirm('确认清空本机演示数据？正式版不会这样粗暴，演示版才这么干。')){localStorage.removeItem(key('reviews'));localStorage.removeItem(key('members'));localStorage.removeItem(key('stats'));render()}}
+
+function importReviewFromHash(){
+  if(!location.hash || !location.hash.startsWith('#review=')) return;
+  try{
+    const raw=decodeURIComponent(location.hash.slice(8));
+    const item=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    const rs=read('reviews',[]);
+    if(!rs.some(x=>x.id===item.id)){
+      rs.push(item); write('reviews',rs);
+      const st=read('stats',{}); st[hotelId()]=st[hotelId()]||{}; st[hotelId()].proof=(st[hotelId()].proof||0)+1; write('stats',st);
+      alert('已导入 1 条客人点评凭证，下面可以审核通过并发积分。');
+    }
+    history.replaceState(null,'',location.pathname+location.search);
+  }catch(e){ alert('导入点评凭证失败，请重新从客人端提交。'); }
+}
 function render(){document.getElementById('hotelText').textContent=`当前酒店：${hotel().name}（hotel_id: ${hotelId()}）｜正式版接腾讯云后支持账号登录和多门店权限。`; const st=(read('stats',{})[hotelId()]||{}); const stats=[['扫码',st.scan||0],['生成',st.generate||0],['复制',st.copy||0],['跳转',st.jump||0],['上传凭证',st.proof||0],['审核通过',st.approved||0]]; document.getElementById('statsGrid').innerHTML=stats.map(x=>`<div class="stat"><b>${x[1]}</b><span>${x[0]}</span></div>`).join(''); const phone=document.getElementById('phoneSearch').value.trim(); let rows=read('reviews',[]).filter(x=>x.hotel_id===hotelId()); if(phone) rows=rows.filter(x=>(x.phone||'').includes(phone)); document.getElementById('reviewRows').innerHTML=rows.slice().reverse().map(r=>`<tr><td>${r.phone||'-'}<br><span class="muted">${r.time||''}</span></td><td>${r.platform||'-'}<br><span class="muted">${r.hotel_name||hotel().name}</span></td><td>${r.fileName||'已上传'}<br><span class="muted">${(r.text||'').slice(0,42)}...</span></td><td><span class="pill ${r.status==='approved'?'ok':''}">${r.status==='approved'?'已通过':r.status==='rejected'?'已驳回':'待审核'}</span><br><span class="muted">${r.points||10}积分</span></td><td>${r.status==='approved'?'已发放':`<button class="btn primary" onclick="approve('${r.id}')">通过并发积分</button> <button class="btn red" onclick="reject('${r.id}')">驳回</button>`}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">暂无点评凭证</td></tr>'; renderMember(phone)}
 
 function redeem(phone, points, name){
@@ -72,6 +87,6 @@ function renderMember(phone){
   }).join('');
   box.innerHTML=`<div class="member-highlight"><div><div class="phone">会员手机号</div><strong>${masked}</strong></div><div><div class="label">当前可用积分</div><div class="points">${points}</div></div></div><div class="redeem-list">${cards}</div><div style="margin-top:12px"><strong>积分/核销记录</strong><br>${(m.logs||[]).slice().reverse().map(l=>'• '+l.time+' '+l.text).join('<br>')||'暂无积分记录'}</div>`
 }
-document.addEventListener('DOMContentLoaded',render)
+document.addEventListener('DOMContentLoaded',()=>{importReviewFromHash();render();})
 </script>
 </body></html>
