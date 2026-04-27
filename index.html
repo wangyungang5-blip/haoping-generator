@@ -281,20 +281,9 @@
         </div>
 
         <div class="card">
-            <div class="card-title"><span class="icon">🏨</span> 酒店端数据预览</div>
-            <div class="small-muted">演示版入口：点击下方按钮可查看本机浏览器里的扫码、复制、跳转、截图、积分记录。正式版会改成腾讯云服务器后台账号登录。</div>
-            <button class="secondary-btn" onclick="toggleAdmin()">打开 / 关闭酒店后台预览</button>
-            <div class="admin-panel" id="adminPanel">
-                <div class="tabs">
-                    <button class="tab active" type="button">点评审核</button>
-                    <button class="tab" type="button">积分会员</button>
-                </div>
-                <div id="adminStats" class="mini-list"></div>
-                <table class="admin-table">
-                    <thead><tr><th>客人</th><th>平台/状态</th><th>积分</th><th>操作</th></tr></thead>
-                    <tbody id="adminRows"></tbody>
-                </table>
-            </div>
+            <div class="card-title"><span class="icon">🔒</span> 酒店工作人员入口</div>
+            <div class="small-muted">酒店端审核、积分查询、权益核销请打开单独后台页面。客人端不展示酒店管理数据，别把后台摆在客人脸上，太业余。</div>
+            <button class="secondary-btn" onclick="location.href='admin.html' + location.search">进入酒店端后台</button>
         </div>
 
         <div class="footer">感谢您的真实入住反馈 ❤️ 评价内容不影响积分发放</div>
